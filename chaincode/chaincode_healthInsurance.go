@@ -336,7 +336,7 @@ func (t *SimpleHealthChaincode) read(stub shim.ChaincodeStubInterface, args []st
 	if len(args) != 1 {
 		return nil, errors.New("Expected 1 argument!")
 	}
-	//user := args[0]
+	user := args[0]
 	//fmt.Println("Finding [%x]",string(applicant))
 /*
 	var columns []shim.Column
@@ -349,10 +349,17 @@ func (t *SimpleHealthChaincode) read(stub shim.ChaincodeStubInterface, args []st
 		return nil, errors.New("Cannot retrieve Rows")
 	}
 */
+	valAsbytes, err := stub.GetState(user)									//get the var from chaincode state
+	if err != nil {
+		jsonResp := "{\"Error\":\"Failed to get state for " + user + "\"}"
+		return nil, errors.New(jsonResp)
+	}
 	fmt.Println("Finished Query function")
+	return valAsbytes, nil
+
 
 	//rowString := fmt.Sprintf("%s", row)
 	//return []byte(rowString), nil
 	//return row.Columns[0].GetBytes(), nil
-return nil,nil
+
 }
