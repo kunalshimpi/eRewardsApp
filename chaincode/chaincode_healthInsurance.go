@@ -89,13 +89,13 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 
 	eRewardAsBytes, err := stub.GetState(user)
 	if err != nil {
-	//	return nil, errors.New("Failed to get eReward Object")
-	//}
-	//if eRewardAsBytes == nil {
+		return nil, errors.New("Failed to get eReward Object")
+	}
+	if eRewardAsBytes == nil {
 		t.init_eReward(stub, args) //will create key/value with eReward stuct
 	}else{
 		//update existing eReward struct
-	//eRewardAsBytes, err := stub.GetState(user)
+	eRewardAsBytes, err := stub.GetState(user)
 	if err != nil {
 		return nil, errors.New("Failed to get struct")
 	}
@@ -184,6 +184,19 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 		&shim.ColumnDefinition{Name:"timestamp",Type: shim.ColumnDefinition_STRING, Key: false},
 		&shim.ColumnDefinition{Name:"Reason",Type: shim.ColumnDefinition_STRING, Key: false},
 	})
+
+	eRewardAsBytes, err := stub.GetState(user)
+	if err != nil {
+		return nil, errors.New("Failed to get struct")
+	}
+	res := eReward{}
+	json.Unmarshal(eRewardAsBytes, &res)
+	i,_ := strconv.Atoi(res.Points)
+	if i == points{
+		fmt.Println("already exists: ")
+		fmt.Println(res);
+		return nil, errors.New("arleady exists")				//all stop a marble by this name exists
+	}
 
 	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + "nil" + `", "signature": ` + "nil" + `, "tx_id": "` + "nil" + `"}`
 	err = stub.PutState(user, []byte(obj))
