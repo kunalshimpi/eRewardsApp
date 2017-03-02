@@ -160,7 +160,7 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 	// }
 
 	fmt.Println("Assign Finished")
-	return nil, err
+	return nil, nil
 }
 
 func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, args []string)([]byte, error){
@@ -185,17 +185,6 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 		&shim.ColumnDefinition{Name:"Reason",Type: shim.ColumnDefinition_STRING, Key: false},
 	})
 
-	marbleAsBytes, err := stub.GetState(name)
-	if err != nil {
-		return nil, errors.New("Failed to get marble name")
-	}
-	res := Marble{}
-	json.Unmarshal(marbleAsBytes, &res)
-	if res.Name == name{
-		fmt.Println("This marble arleady exists: " + name)
-		fmt.Println(res);
-		return nil, errors.New("This marble arleady exists")				//all stop a marble by this name exists
-	}
 	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + "nil" + `", "signature": ` + "nil" + `, "tx_id": "` + "nil" + `"}`
 	err = stub.PutState(user, []byte(obj))
 	if err != nil {
