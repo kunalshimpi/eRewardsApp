@@ -186,7 +186,8 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 	})
 
 	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + "nil" + `", "signature": ` + "nil" + `, "tx_id": "` + "nil" + `"}`
-	err = stub.PutState("struct1", "hello")
+fmt.print(obj)
+	err = stub.PutState("struct1", []byte("hello"))
 	if err != nil {
 		return nil, err
   }
