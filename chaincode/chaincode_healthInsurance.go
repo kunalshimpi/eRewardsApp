@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strconv"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"encoding/json"
 	//"github.com/hyperledger/fabric/core/crypto/primitives"
 )
 
@@ -47,10 +48,6 @@ func (t *SimpleHealthChaincode) Init(stub shim.ChaincodeStubInterface, function 
 	fmt.Println("**********Inside Init*******");
 	if len(args) != 0 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 0")
-	}
-
-	if err!= nil {
-		return nil, errors.New("Error in Creating Activity Table!")
 	}
 
 	/*adminCert, err := stub.GetCallerMetadata()
@@ -90,22 +87,24 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 	user := args[0]
 	Sign_assigner := args[2]
 
-	eRewardAsBytes, err = stub.GetState(user)
+	eRewardAsBytes, err := stub.GetState(user)
 	if err != nil {
 		return nil, errors.New("Failed to get eReward Object")
 	}
 	if eRewardAsBytes == nil {
-		t.init_eReward(points, user, Sign_assigner) //will create key/value with eReward stuct
-	}
-	else{
+		t.init_eReward(stub, args) //will create key/value with eReward stuct
+	}else{
 		//update existing eReward struct
-	//eRewardAsBytes, err := stub.GetState(user)
-	// if err != nil {
-	// 	return nil, errors.New("Failed to get struct")
-	// }
+	eRewardAsBytes, err := stub.GetState(user)
+	if err != nil {
+		return nil, errors.New("Failed to get struct")
+	}
 	res := eReward{}
-	json.Unmarshal(eRewardsAsBytes, &res)
-	res.Points = res.Points + points
+	json.Unmarshal(eRewardAsBytes, &res)
+
+	oldPoints,_ := strconv.Atoi(res.Points)
+	newPoints := oldPoints + points
+	res.Points = strconv.Itoa(newPoints)
 
 	jsonAsBytes, _ := json.Marshal(res)
 	err = stub.PutState(user, jsonAsBytes)
@@ -113,15 +112,16 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 		return nil, err
 	}
 
-	ok, err1 := stub.InsertRow("ActivityTable", shim.Row{
+	_, err1 := stub.InsertRow("ActivityTable", shim.Row{
 		Columns: []*shim.Column {
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-			&shim.Column{Value: &shim.Column_String_{String_:points}},
+			&shim.Column{Value: &shim.Column_String_{String_:strconv.Itoa(points)}},
 			&shim.Column{Value: &shim.Column_String_{String_:user}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:Sign_assigner}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:"assign"}},
 			},
 	})
 	if err1 != nil{
@@ -185,32 +185,37 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 		&shim.ColumnDefinition{Name:"Reason",Type: shim.ColumnDefinition_STRING, Key: false},
 	})
 
-	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + nil + `", "signature": ` + nil + `, "tx_id": "` + nil + `"}`
+	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + "nil" + `", "signature": ` + "nil" + `, "tx_id": "` + "nil" + `"}`
 	err = stub.PutState(user, []byte(obj))
 	if err != nil {
 		return nil, err
   }
 
-	ok, err1 := stub.InsertRow("ActivityTable", shim.Row{
+	_, err1 := stub.InsertRow("ActivityTable", shim.Row{
 		Columns: []*shim.Column {
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-			&shim.Column{Value: &shim.Column_String_{String_:points}},
+			&shim.Column{Value: &shim.Column_String_{String_:strconv.Itoa(points)}},
 			&shim.Column{Value: &shim.Column_String_{String_:user}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:Sign_assigner}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:"assign init"}},
 			},
 	})
+	if err1 != nil {
+		return nil, errors.New("InsertRow failed in init")
+	}
+	return nil,nil
 }
 
 func (t *SimpleHealthChaincode) redeem(stub shim.ChaincodeStubInterface, args []string)([]byte, error){
 	if len(args) != 3{
 		return nil, errors.New("Expected 3 arguments!")
 	}
-	b_entity := []byte(args[0])
-	user := []byte(args[1])
-	redeemPoints := strconv.Atoi(args[2])
+	b_entity := args[0]
+	user := args[1]
+	redeemPoints,_ := strconv.Atoi(args[2])
 
 	/*
 //check caller and Owner
@@ -221,15 +226,18 @@ func (t *SimpleHealthChaincode) redeem(stub shim.ChaincodeStubInterface, args []
 	if !ok {
 		return nil, errors.New("The caller is not the owner of the amount")
 	}*/
-//change assets  of sender
 
+//change assets  of sender
 	eRewardAsBytes, err := stub.GetState(user)
 	if err != nil {
  		return nil, errors.New("Failed to get struct")
 	}
 	res := eReward{}
-	json.Unmarshal(eRewardsAsBytes, &res)
-	res.Points = res.Points - redeemPoints
+	json.Unmarshal(eRewardAsBytes, &res)
+
+	oldPoints,_ := strconv.Atoi(res.Points)
+	newPoints := oldPoints - redeemPoints
+	res.Points = strconv.Itoa(newPoints)
 
 	jsonAsBytes, _ := json.Marshal(res)
 	err = stub.PutState(user, jsonAsBytes)
@@ -237,15 +245,16 @@ func (t *SimpleHealthChaincode) redeem(stub shim.ChaincodeStubInterface, args []
 		return nil, err
 	}
 
-	ok, err1 := stub.InsertRow("ActivityTable", shim.Row{
+	_, err1 := stub.InsertRow("ActivityTable", shim.Row{
 		Columns: []*shim.Column {
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-			&shim.Column{Value: &shim.Column_String_{String_:redeemPoints}},
+			&shim.Column{Value: &shim.Column_String_{String_:strconv.Itoa(redeemPoints)}},
 			&shim.Column{Value: &shim.Column_String_{String_:user}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:b_entity}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:"Redeem"}},
 			},
 	})
 	if err1 != nil{
@@ -300,9 +309,9 @@ func (t *SimpleHealthChaincode) Invoke(stub shim.ChaincodeStubInterface, functio
 
 	// Handle different functions
 	if function == "assign" {													//initialize the chaincode state, used as reset
-		return t.approve(stub, args)
+		return t.assign(stub, args)
 	} else if function == "redeem"{
-		return t.transfer(stub, args)
+		return t.redeem(stub, args)
 	}
 	fmt.Println("invoke did not find func: " + function)					//error
 
@@ -327,7 +336,7 @@ func (t *SimpleHealthChaincode) read(stub shim.ChaincodeStubInterface, args []st
 	if len(args) != 1 {
 		return nil, errors.New("Expected 1 argument!")
 	}
-	user := args[0]
+	//user := args[0]
 	//fmt.Println("Finding [%x]",string(applicant))
 /*
 	var columns []shim.Column
@@ -342,8 +351,8 @@ func (t *SimpleHealthChaincode) read(stub shim.ChaincodeStubInterface, args []st
 */
 	fmt.Println("Finished Query function")
 
-	rowString := fmt.Sprintf("%s", row)
-	return []byte(rowString), nil
+	//rowString := fmt.Sprintf("%s", row)
+	//return []byte(rowString), nil
 	//return row.Columns[0].GetBytes(), nil
-
+return nil,nil
 }
