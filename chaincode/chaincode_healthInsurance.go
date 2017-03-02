@@ -89,13 +89,13 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 
 	eRewardAsBytes, err := stub.GetState(user)
 	if err != nil {
-		return nil, errors.New("Failed to get eReward Object")
-	}
-	if eRewardAsBytes == nil {
+	//	return nil, errors.New("Failed to get eReward Object")
+	//}
+	//if eRewardAsBytes == nil {
 		t.init_eReward(stub, args) //will create key/value with eReward stuct
 	}else{
 		//update existing eReward struct
-	eRewardAsBytes, err := stub.GetState(user)
+	//eRewardAsBytes, err := stub.GetState(user)
 	if err != nil {
 		return nil, errors.New("Failed to get struct")
 	}
