@@ -83,9 +83,9 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 		return nil, errors.New("Expected 3 arguments!")
 	}
 
-	points, _ := strconv.Atoi(args[1]) //parse to int
-	user := args[0]
-	Sign_assigner := args[2]
+	// points, _ := strconv.Atoi(args[1]) //parse to int
+	// user := args[0]
+	// Sign_assigner := args[2]
 
 	// eRewardAsBytes, err := stub.GetState(user)
 	// if err != nil {
