@@ -354,6 +354,14 @@ func (t *SimpleHealthChaincode) read(stub shim.ChaincodeStubInterface, args []st
 		jsonResp := "{\"Error\":\"Failed to get state for " + user + "\"}"
 		return nil, errors.New(jsonResp)
 	}
+
+	if valAsbytes == nil {
+		jsonResp := "{\"Error\":\"Nil struct for " + user + "\"}"
+		return nil, errors.New(jsonResp)
+	}
+
+	jsonResp := "{\"Name\":\"" + user + "\",\"Amount\":\"" + string(valAsbytes) + "\"}"
+	fmt.Printf("Query Response:%s\n", jsonResp)
 	fmt.Println("Finished Query function")
 	return valAsbytes, nil
 
