@@ -83,51 +83,51 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 		return nil, errors.New("Expected 3 arguments!")
 	}
 
-	// points, _ := strconv.Atoi(args[1]) //parse to int
-	// user := args[0]
-	// Sign_assigner := args[2]
+	points, _ := strconv.Atoi(args[1]) //parse to int
+	user := args[0]
+	Sign_assigner := args[2]
 
-	// eRewardAsBytes, err := stub.GetState(user)
-	// if err != nil {
-	// 	return nil, errors.New("Failed to get eReward Object")
-	// }
-	// if eRewardAsBytes == nil {
+	eRewardAsBytes, err := stub.GetState(user)
+	if err != nil {
+		return nil, errors.New("Failed to get eReward Object")
+	}
+	if eRewardAsBytes == nil {
 		t.init_eReward(stub, args) //will create key/value with eReward stuct
-	// }else{
-	// 	//update existing eReward struct
-	// eRewardAsBytes, err := stub.GetState(user)
-	// if err != nil {
-	// 	return nil, errors.New("Failed to get struct")
-	// }
-	// res := eReward{}
-	// json.Unmarshal(eRewardAsBytes, &res)
-	//
-	// oldPoints,_ := strconv.Atoi(res.Points)
-	// newPoints := oldPoints + points
-	// res.Points = strconv.Itoa(newPoints)
-	//
-	// jsonAsBytes, _ := json.Marshal(res)
-	// err = stub.PutState(user, jsonAsBytes)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// _, err1 := stub.InsertRow("ActivityTable", shim.Row{
-	// 	Columns: []*shim.Column {
-	// 		&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-	// 		&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-	// 		&shim.Column{Value: &shim.Column_String_{String_:strconv.Itoa(points)}},
-	// 		&shim.Column{Value: &shim.Column_String_{String_:user}},
-	// 		&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-	// 		&shim.Column{Value: &shim.Column_String_{String_:Sign_assigner}},
-	// 		&shim.Column{Value: &shim.Column_String_{String_:"test"}},
-	// 		&shim.Column{Value: &shim.Column_String_{String_:"assign"}},
-	// 		},
-	// })
-	// if err1 != nil{
-	// 	return nil, errors.New("Insert Row failed!")
-	// }
-  // }
+	}else{
+		//update existing eReward struct
+	eRewardAsBytes, err := stub.GetState(user)
+	if err != nil {
+		return nil, errors.New("Failed to get struct")
+	}
+	res := eReward{}
+	json.Unmarshal(eRewardAsBytes, &res)
+
+	oldPoints,_ := strconv.Atoi(res.Points)
+	newPoints := oldPoints + points
+	res.Points = strconv.Itoa(newPoints)
+
+	jsonAsBytes, _ := json.Marshal(res)
+	err = stub.PutState(user, jsonAsBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err1 := stub.InsertRow("ActivityTable", shim.Row{
+		Columns: []*shim.Column {
+			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:strconv.Itoa(points)}},
+			&shim.Column{Value: &shim.Column_String_{String_:user}},
+			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:Sign_assigner}},
+			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
+			&shim.Column{Value: &shim.Column_String_{String_:"assign"}},
+			},
+	})
+	if err1 != nil{
+		return nil, errors.New("Insert Row failed!")
+	}
+  }
 
 	/*adminCert, err := stub.GetState("admin")
 	if err != nil{
@@ -160,7 +160,7 @@ func (t *SimpleHealthChaincode) assign(stub shim.ChaincodeStubInterface, args []
 	// }
 
 	fmt.Println("Assign Finished")
-	return nil, nil
+	return nil, err
 }
 
 func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, args []string)([]byte, error){
@@ -186,7 +186,7 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 	})
 
 	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + "nil" + `", "signature": ` + "nil" + `, "tx_id": "` + "nil" + `"}`
-	err = stub.PutState(user, []byte(obj))
+	err = stub.PutState("struct1", []byte(obj))
 	if err != nil {
 		return nil, err
   }
