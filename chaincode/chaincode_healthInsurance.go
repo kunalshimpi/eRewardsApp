@@ -185,9 +185,20 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 		&shim.ColumnDefinition{Name:"Reason",Type: shim.ColumnDefinition_STRING, Key: false},
 	})
 
-	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + "nil" + `", "signature": ` + "nil" + `, "tx_id": "` + "nil" + `"}`
-fmt.Println(obj)
-	err = stub.PutState("struct1", []byte("hello"))
+//	obj := `{"points": "` + strconv.Itoa(points) + `", "hash": "` + "nil" + `", "signature": ` + "nil" + `, "tx_id": "` + "nil" + `"}`
+//fmt.Println(obj)
+	obj := &eReward{}
+	obj.Points = strconv.Itoa(points)
+	obj.Hash = user
+	obj.Signature = user
+	obj.Tx_ID = "tx1"
+
+	objAsJson, err1 := json.Marshall(obj)
+	if err1 !=nil {
+		return nil,err1
+	}
+
+	err = stub.PutState(user, objAsJson)
 	if err != nil {
 		return nil, err
   }
