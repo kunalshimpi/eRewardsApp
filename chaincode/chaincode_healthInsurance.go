@@ -198,7 +198,7 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 		return nil,err1
 	}
 
-	err = stub.PutState(user, objAsJson)
+	err = stub.PutState("struct", objAsJson)
 	if err != nil {
 		return nil, err
   }
