@@ -29,7 +29,7 @@ type SimpleHealthChaincode struct {
 type eReward struct{
 	Points string `json:"points"`
 	Hash string `json:"hash"`
-	Signature int `json:"signature"`
+	Signature string `json:"signature"`
 	Tx_ID string `json:"tx_id"`
 }
 // ============================================================================================================================
@@ -193,7 +193,7 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 	obj.Signature = user
 	obj.Tx_ID = "tx1"
 
-	objAsJson, err1 := json.Marshall(obj)
+	objAsJson, err1 := json.Marshal(obj)
 	if err1 !=nil {
 		return nil,err1
 	}
@@ -203,7 +203,7 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 		return nil, err
   }
 
-	_, err1 := stub.InsertRow("ActivityTable", shim.Row{
+	_, err2 := stub.InsertRow("ActivityTable", shim.Row{
 		Columns: []*shim.Column {
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
@@ -215,7 +215,7 @@ func (t *SimpleHealthChaincode)init_eReward(stub shim.ChaincodeStubInterface, ar
 			&shim.Column{Value: &shim.Column_String_{String_:"assign init"}},
 			},
 	})
-	if err1 != nil {
+	if err2 != nil {
 		return nil, errors.New("InsertRow failed in init")
 	}
 	return nil,nil
