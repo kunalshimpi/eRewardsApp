@@ -115,7 +115,7 @@ func (t *SimpleRewardsChaincode) assign(stub shim.ChaincodeStubInterface, args [
 		return nil, err
 	}
 
-	_, err1 := stub.InsertRow("ActivityTable", shim.Row{
+	_, err1 := stub.InsertRow(user, shim.Row{
 		Columns: []*shim.Column {
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
@@ -177,7 +177,7 @@ func (t *SimpleRewardsChaincode)init_eReward(stub shim.ChaincodeStubInterface, a
 	user := args[1]
 	Sign_assigner := args[2]
 
-	err := stub.CreateTable("ActivityTable", []*shim.ColumnDefinition{
+	err := stub.CreateTable(user, []*shim.ColumnDefinition{
 		&shim.ColumnDefinition{Name:"Tx_ID",Type: shim.ColumnDefinition_STRING, Key: true},
 		&shim.ColumnDefinition{Name:"From",Type: shim.ColumnDefinition_STRING, Key: false},
 		&shim.ColumnDefinition{Name:"RewardPoint",Type: shim.ColumnDefinition_STRING, Key: false},
@@ -206,7 +206,7 @@ func (t *SimpleRewardsChaincode)init_eReward(stub shim.ChaincodeStubInterface, a
 		return nil, err
   }
 
-	_, err2 := stub.InsertRow("ActivityTable", shim.Row{
+	_, err2 := stub.InsertRow(user, shim.Row{
 		Columns: []*shim.Column {
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
@@ -261,7 +261,7 @@ func (t *SimpleRewardsChaincode) redeem(stub shim.ChaincodeStubInterface, args [
 		return nil, err
 	}
 
-	_, err1 := stub.InsertRow("ActivityTable", shim.Row{
+	_, err1 := stub.InsertRow(user, shim.Row{
 		Columns: []*shim.Column {
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
 			&shim.Column{Value: &shim.Column_String_{String_:"test"}},
